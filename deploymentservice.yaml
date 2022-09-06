@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-deployment
+spec:
+  selector:
+    matchLabels:
+      app: api
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: faouzi0007/api:latest
+          ports:
+            - containerPort: 9000
+          env:   # Setting Enviornmental Variables
+            - name: DB_HOST   # Setting Database host address from configMap
+              value: mysql
+
+            - name: DB_NAME  # Setting Database name from configMap
+              value: webapp
+
+            - name: DB_USERNAME  # Setting Database username from Secret
+              value: root
+
+            - name: DB_PASSWORD # Setting Database password from Secret
+              value: root
+
+---
+
+apiVersion: v1 # Kubernetes API version
+kind: Service # Kubernetes resource kind we are creating
+metadata: # Metadata of the resource kind we are creating
+  name: api-svc
+spec:
+  selector:
+    app: api
+  ports:
+    - protocol: "TCP"
+      port: 9000 # The port that the service is running on in the cluster
+      targetPort: 9000 # The port exposed by the service
+  type: NodePort # type of the service.
